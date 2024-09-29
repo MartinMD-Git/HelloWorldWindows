@@ -41,5 +41,14 @@ public class Room {
         return description;
 
     }
+    public Room getExit(String direction) {
+        switch (direction.toLowerCase()) {
+        case "north": return north;
+        case "south": return south;
+        case "east": return east;
+        case "west": return west;
+        default: return null;
+    }
 
+}
 }
