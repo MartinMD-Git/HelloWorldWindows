@@ -30,6 +30,21 @@ public class Map {
 
         startingRoom = room1;
 
+        Items key = new Items("A big green key", "key");
+        Items lamp = new Items("A shiny bass lamp", "lamp");
+        Items sword = new Items("A long sword", "sword");
+        Items candle = new Items("A small candle", "candle");
+        Items book = new Items("A big book", "book");
+
+
+        room1.addItem(key);
+        room2.addItem(lamp);
+        room3.addItem(sword);
+        room4.addItem(candle);
+        room5.addItem(book);
+
+
+
 
     }
     public Room getStartingRoom() {
