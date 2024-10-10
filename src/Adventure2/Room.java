@@ -25,11 +25,13 @@ public class Room {
     private Room w;
     private Room e;
     private List<Item> items;
+    private List<Enemy> enemies;
 
     public Room(int roomNumber, String roomDescription) {
         this.roomNumber = roomNumber;
         this.roomDescription = roomDescription;
         this.items = new ArrayList<>();
+        this.enemies = new ArrayList<>();
     }
 
     public void addItem(Item item) {
@@ -39,9 +41,7 @@ public class Room {
     public List<Item> getItems() {
         return items;
     }
-    public void dropitem(Item item) {
-        items.add(item);
-    }
+
 
     public int getRoomNumber() {
         return roomNumber;
@@ -87,11 +87,31 @@ public class Room {
     @Override
     public String toString() {
 
-        return "Room " + roomNumber + ": " + roomDescription + "\nItems in this room: " + items;
+        return "Room " + roomNumber + ": " + roomDescription + "\nItems in this room: " + items +
+                "\nEnemies in this room: " + enemies;
 
     }
 
     public void dropItem(Item itemToDrop) {
         items.add(itemToDrop);
+    }
+    public void addEnemy(Enemy enemy) {
+        enemies.add(enemy);
+    }
+
+    public List<Enemy> getEnemies() {
+        return enemies;
+    }
+
+    public void removeEnemy(Enemy enemy) {
+        enemies.remove(enemy);
+    }
+    public Enemy getNearestEnemy() {
+        if (enemies.isEmpty()) {
+            return null;
+        } else {
+            return enemies.get(0);
+        }
+
     }
 }

@@ -18,6 +18,7 @@ public class UserInterface {
         System.out.println("Your characters name is " + playerName);
         System.out.println("To move around, use commands: 'go north', 'go east', go west', 'go south'.");
         System.out.println("You can at all times write 'help', 'look' or 'exit', 'backpack'.");
+        System.out.println("Your current health is: " + adventure.getPlayer().getPlayerHealth() + ". Do not let it reach 0");
         System.out.println("If there are any items in the room your character is in, you can always pick them up and drop them whereever you like. Simply write: 'take <item>' or 'drop <item>'.");
         System.out.println(playerName + " starts in room 1. Tip: Take a look around to see if there is anything useful for " + playerName + " to use.");
 
@@ -55,6 +56,7 @@ public class UserInterface {
                             itemToDrop = item;
                             break;
                         }
+
                     }
                     if (itemToDrop != null) {
                         adventure.getPlayer().getCurrentRoom().dropItem(itemToDrop);
@@ -63,44 +65,160 @@ public class UserInterface {
                     } else {
                         System.out.println("You don't have that item.");
                     }
-                }
-            } else {
 
+                }
+
+
+            } else if (useraction.startsWith("eat ")) {
+                String[] parts = useraction.split("eat", 2);
+                if(parts.length < 2) {
+                    System.out.println("Eat what?");
+                } else {
+                    String itemName = parts[1].trim();
+                    String result = adventure.eat(itemName);
+                    System.out.println(result);
+
+                }
+            }
+            else if (useraction.startsWith("equip ")) {
+                String[] parts = useraction.split("equip ", 2);
+                if (parts.length < 2) {
+                    System.out.println("Equip what?");
+                } else {
+                    String weaponName = parts[1].trim();
+                    Weapon weaponToEquip = null;
+
+                    for (Item item : adventure.getPlayer().getItemArrayList()) {
+                        if (item instanceof Weapon && item.getItemName().equalsIgnoreCase(weaponName)) {
+                            weaponToEquip = (Weapon) item;
+                            break;
+                        }
+                    }
+
+                    if (weaponToEquip != null) {
+                        adventure.getPlayer().equipWeapon(weaponToEquip);
+                        System.out.println("You equipped " + weaponName);
+                    } else {
+                        System.out.println("You do not have that weapon in your inventory or it is not a weapon.");
+                    }
+                }
+            }
+            else if (useraction.startsWith("attack")) {
+                String[] parts = useraction.split("attack", 2);
+                Room currentRoom = adventure.getPlayer().getCurrentRoom();
+
+                if(currentRoom.getEnemies().isEmpty()){
+                    System.out.println("There are no enemies to attack in this room");
+                } else {
+                    Enemy targetEnemy;
+
+                    if (parts.length < 1) {
+                        String enemyName = parts[1].trim();
+                        targetEnemy = currentRoom.getEnemies().stream()
+                                .filter(e -> e.getName().equalsIgnoreCase(enemyName))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (targetEnemy == null) {
+                            System.out.println("There is no enemy with that name in this room.");
+                            continue;
+                        }
+                    } else {
+                        targetEnemy = currentRoom.getNearestEnemy();
+                    }
+                    adventure.getPlayer().attack(targetEnemy);
+                }
+
+            }
+
+                else if(useraction.startsWith("attack ")) {
+                Weapon equipped = adventure.getPlayer().getEquippedWeapon();
+
+                if (equipped == null) {
+                    System.out.println("You have no weapon equipped to attack.");
+                } else if (!equipped.canUse()) {
+                    System.out.println("Your weapon is out of uses and cannot be used.");
+                } else {
+                    // Perform the attack
+                    equipped.canUse();
+                    if (equipped instanceof RangedWeapon) {
+                        System.out.println("You fire your " + equipped.getItemName() + " into the empty air.");
+                    } else {
+                        System.out.println("You swing your " + equipped.getItemName() + " at the empty space.");
+                    }
+                }
+            }
+                else {
                 switch (useraction) {
 
                     case "inventory", "i", "backpack", "b", "inv" -> {
                         System.out.println(playerName + " has " + adventure.getPlayer().getItemArrayList() + " items in the backpack.");
+                        Weapon equippedWeapon = adventure.getPlayer().getEquippedWeapon();
+                        if (equippedWeapon != null) {
+                            System.out.println("Currently equipped weapon: " + equippedWeapon.getItemName());
+                        } else {
+                            System.out.println("No weapon is currently equipped.");
+                        }
+
                     }
 
                     case "go n", "go north", "n", "north" -> {
-                        adventure.getPlayer().getN();
-                        break;
+                        Room newRoom = adventure.getPlayer().getCurrentRoom().getN();
+                        adventure.getPlayer().moveTo(newRoom);
+
+
                     }
 
                     case "go s", "go south", "s", "south" -> {
-                        adventure.getPlayer().getS();
-                        break;
+                        Room newRoom = adventure.getPlayer().getCurrentRoom().getS();
+                        adventure.getPlayer().moveTo(newRoom);
+
                     }
 
                     case "go e", "go east", "e", "east" -> {
-                        adventure.getPlayer().getE();
-                        break;
+                        Room newRoom = adventure.getPlayer().getCurrentRoom().getE();
+                        adventure.getPlayer().moveTo(newRoom);
                     }
 
                     case "go w", "go west", "w", "west" -> {
-                        adventure.getPlayer().getW();
-                        break;
+                        Room newRoom = adventure.getPlayer().getCurrentRoom().getW();
+                        adventure.getPlayer().moveTo(newRoom);
+                        
                     }
 
+                    case "health" -> {
+                        int health = adventure.getPlayer().getPlayerHealth();
+                        String healthStatus;
+
+                        if (health > 75) {
+                            healthStatus = "You are in great health.";
+                        } else if (health > 50) {
+                            healthStatus = "You are in good health.";
+                        } else if (health > 25) {
+                            healthStatus = "You are in poor health, be careful.";
+                        } else {
+                            healthStatus = "You are in critical condition!";
+                        }
+                        System.out.println("Health: " + health + " - " + healthStatus);
+                    }
 
                     case "look", "l", "Look" -> {
                         List<Item> items = adventure.getPlayer().getCurrentRoom().getItems();
+                        List<Enemy> enemies = adventure.getPlayer().getCurrentRoom().getEnemies();
                         if (items.isEmpty()) {
                             System.out.println("There is nothing useful for " + playerName + " to pick up in this room.");
                         } else {
                             System.out.println("You see the following items in the current room:");
                             for (Item item : items) {
                                 System.out.println(item);
+                            }
+                        }
+                        if (enemies.isEmpty()) {
+                            System.out.println("There are no enemies in this room.");
+                        } else {
+                            System.out.println("You see the following enemies:");
+                            for (Enemy enemy : enemies) {
+                                System.out.println(enemy);
                             }
                         }
                     }
@@ -122,4 +240,3 @@ public class UserInterface {
         }
     }
 }
-

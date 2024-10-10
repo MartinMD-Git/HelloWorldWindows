@@ -14,6 +14,22 @@ public class Adventure {
     public Player getPlayer() {
         return player;
     }
+    public String eat(String foodName) {
+        Player.FoodStatus status = player.eat(foodName);
+        switch (status) {
+            case GOOD:
+                return "You ate " + foodName + ". You now have " + player.getPlayerHealth() + " healthpoints";
+
+            case BAD:
+                return "You ate " + foodName + ". You lost " + player.getPlayerHealth() + " healthpoints";
+
+            case NOT_FOOD:
+                return "You cannot eat that";
+
+            default:
+                return "Invalid input";
+        }
+    }
 
 
 }
